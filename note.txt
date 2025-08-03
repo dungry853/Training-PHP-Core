@@ -1,4 +1,12 @@
+Setup:
+config -> core,models,middleware(nếu cần) -> routes -> public/index.php để khởi tạo các lớp như Session và Router,... -> views và controller
+
+Composer là công cụ quản lý các thư viện tích hợp cho php như node modules của npm
+
 Trong Core cần đảm bảo đầy đủ các lớp như:
 Controller ( base ): dùng để load view,...
 Request: client gửi yêu cầu về server, xử lý dữ liệu gửi về
 Response: sau khi xử lý xong dữ liệu, sẽ trả dữ liệu về client
+Router: dùng thư viện AltoRouter kết hợp xử lý url để xử lý
+Session: các phương thức cần thiết của session 
+Validator: định nghĩa và automap các lỗi
