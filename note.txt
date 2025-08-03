@@ -1,0 +1,4 @@
+Trong Core cần đảm bảo đầy đủ các lớp như:
+Controller ( base ): dùng để load view,...
+Request: client gửi yêu cầu về server, xử lý dữ liệu gửi về
+Response: sau khi xử lý xong dữ liệu, sẽ trả dữ liệu về client

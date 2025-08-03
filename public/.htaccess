@@ -1,0 +1,10 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Rewrite mọi request không phải file thật hoặc thư mục thật
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Gửi về index.php
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
