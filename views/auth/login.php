@@ -1,3 +1,18 @@
+<?php
+
+use App\Models\RoleType;
+
+$roleId = $_SESSION['user']['role_id'] ?? null;
+if (isset($_SESSION['user']) && in_array($roleId, RoleType::allCases())) {
+    header('Location: /admin/dashboard');
+    exit;
+} else if (isset($_SESSION['user']) && $roleId == RoleType::USER->value) {
+    header('Location: /');
+    exit;
+}
+?>
+
+
 <div class="container d-flex justify-content-center align-items-center">
     <div class="login-form">
         <h2>Đăng nhập quản trị</h2>
