@@ -7,6 +7,7 @@ use App\Config\Database;
 
 use DateTime;
 use PDO;
+use Exception;
 
 class User
 {
@@ -115,29 +116,66 @@ class User
 
     public static function getUserByUsernameAndPassword(string $username, string $password): ?User
     {
-        $db = new Database();
-        $connection = $db->getConnection();
+        try {
+            $db = new Database();
+            $connection = $db->getConnection();
 
-        $stmt = $connection->prepare("SELECT * FROM user WHERE username = :username AND password = :password");
+            $stmt = $connection->prepare("SELECT * FROM user WHERE username = :username");
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT); // Sử dụng password_hash thay vì md5
+            $stmt->bindParam(':username', $username);
+            $stmt->execute();
+            $userData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($userData && password_verify($password, $userData['password'])) {
+                return new User(
+                    $userData['user_id'],
+                    $userData['username'],
+                    $userData['password'],
+                    $userData['email'],
+                    $userData['full_name'],
+                    new DateTime($userData['dob']),
+                    new DateTime($userData['created_at']),
+                    new DateTime($userData['updated_at']),
+                    new Role($userData['role_id'], '', new DateTime(), new DateTime())
+                );
+            }
+        } catch (Exception $e) {
+            throw new Exception("Lỗi khi lấy người dùng: " . $e->getMessage());
+        }
+        return null;
+    }
+
+    public static function checkUsernameOrEmailExists(string $username, string $email): bool
+    {
+        $db = new Database();
+        $conn = $db->getConnection();
+        $stmt = $conn->prepare("SELECT * FROM user WHERE username = :username OR email = :email");
         $stmt->bindParam(':username', $username);
-        $stmt->bindParam(':password', $password); // Giả sử mật khẩu được mã hóa bằng md5
+        $stmt->bindParam(':email', $email);
         $stmt->execute();
         $userData = $stmt->fetch(PDO::FETCH_ASSOC);
+        return !empty($userData);
+    }
 
-        if ($userData) {
-            return new User(
-                $userData['user_id'],
-                $userData['username'],
-                $userData['password'],
-                $userData['email'],
-                $userData['full_name'],
-                new DateTime($userData['dob']),
-                new DateTime($userData['created_at']),
-                new DateTime($userData['updated_at']),
-                new Role($userData['role_id'], '', new DateTime(), new DateTime())
-            );
+    public static function createUser(string $username, string $password, string $email, string $fullName, DateTime $dob, int $roleId): bool
+    {
+        try {
+            $db = new Database();
+            $conn = $db->getConnection();
+            $stmt = $conn->prepare("INSERT INTO user (username, password, full_name, email ,dob, role_id) VALUES (:username, :password, :full_name, :email, :dob, :role_id)");
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT); // Lưu ý: Nên dùng password_hash() thay vì md5
+            $dobFormatted = $dob->format('Y-m-d');
+            $stmt->bindParam(':username', $username);
+            $stmt->bindParam(':password', $hashedPassword);
+            $stmt->bindParam(':full_name', $fullName);
+            $stmt->bindParam(':email', $email);
+            $stmt->bindParam(':dob', $dobFormatted);
+            $stmt->bindParam(':role_id', $roleId);
+            return $stmt->execute();
+        } catch (\Exception $e) {
+            throw new Exception("Lỗi khi tạo người dùng: " . $e->getMessage());
+            // Xử lý lỗi nếu cần
+            return false;
         }
-
-        return null;
     }
 }

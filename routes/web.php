@@ -11,7 +11,8 @@ $router->map("GET", "/login", ['controller' => 'Auth\AuthController', 'action' =
 $router->map("POST", "/login", ['controller' => 'Auth\AuthController', 'action' => 'loginPost', 'middleware' => []], 'login.post');
 $router->map("GET", "/logout", ['controller' => 'Auth\AuthController', 'action' => 'logout', 'middleware' => []], 'logout');
 $router->map("GET", "/no-access", ['controller' => 'Auth\AuthController', 'action' => 'noAccess'], 'no_access');
-
+$router->map("GET", "/register", ['controller' => 'Auth\AuthController', 'action' => 'register'], 'register');
+$router->map("POST", "/register", ['controller' => 'Auth\AuthController', 'action' => 'registerPost', 'middleware' => []], 'register.post');
 //User
 $router->map("GET", "/", ['controller' => 'User\HomeController', 'action' => 'index', 'middleware' => [RoleType::USER->value]], 'user.index');
 
@@ -34,4 +35,4 @@ $router->map("GET", "/admin/category", ['controller' => 'Admin\HomeController', 
 
 
 //Admin User
-$router->map("GET", "/admin/user", ['controller' => 'Admin\HomeController', 'action' => 'user', 'middleware' => [RoleType::ADMIN->value]], 'admin.user.index');
+$router->map("GET", "/admin/user", ['controller' => 'Admin\HomeController', 'action' => 'user', 'middleware' => [RoleType::ADMIN->value, RoleType::HR->value]], 'admin.user.index');

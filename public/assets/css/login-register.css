@@ -5,12 +5,11 @@ body {
 }
 
 .footer {
-  position: absolute;
   display: flex;
   justify-content: center;
   align-items: center;
-  bottom: 0px;
   width: 100%;
+  margin-top: 20px;
   height: 50px;
   background-color: white;
   color: black;
@@ -21,6 +20,9 @@ body {
 
 main {
   padding: 20px;
+  min-height: calc(
+    100vh - 70px
+  ); /* Adjust height to account for header and footer */
 }
 
 .header {
@@ -84,7 +86,7 @@ main {
 .login-form form {
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: 15px;
 }
 
 .form-group {
@@ -102,7 +104,7 @@ main {
 
 .form-group input {
   flex: 1;
-  padding: 10px;
+  padding: 5px 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
 }

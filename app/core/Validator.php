@@ -2,6 +2,8 @@
 
 namespace App\Core;
 
+use DateTime;
+
 class Validator
 {
     protected array $errors = [];
@@ -59,6 +61,23 @@ class Validator
                     case 'max':
                         if (strlen($value) > (int)$ruleValue) {
                             $this->addError($field, "$field không được vượt quá $ruleValue ký tự");
+                        }
+                        break;
+                    case 'same':
+                        if ($value !== ($data[$ruleValue] ?? null)) {
+                            $this->addError($field, "$field phải giống với $ruleValue");
+                        }
+                        break;
+
+                    case 'date_format':
+                        $dateFormat = 'Y-m-d'; // Định dạng ngày mặc định
+                        if ($ruleValue) {
+                            $dateFormat = $ruleValue; // Nếu có định dạng cụ thể
+                        }
+
+                        $d = DateTime::createFromFormat($dateFormat, $value);
+                        if (!$d || $d->format($dateFormat) !== $value) {
+                            $this->addError($field, "$field phải có định dạng ngày tháng là $dateFormat");
                         }
                         break;
 

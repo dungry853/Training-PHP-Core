@@ -1,13 +1,43 @@
 <div class="container d-flex justify-content-center align-items-center">
     <div class="login-form">
-        <h2>Đăng nhập quản trị</h2>
-        <form method="post" action="/admin/login">
+        <h2>Đăng ký tài khoản</h2>
+        <form method="post" action="/register">
             <div class="form-group">
-                <input value="<?= $data['username'] ?? '' ?>" type="text" name="username" id="username" required placeholder="Tên đăng nhập/Email">
+                <input value="<?= $data['username'] ?? '' ?>" type="text" name="username" id="username" required placeholder="Tên đăng nhập">
                 <span class="error">
                     <?php
                     if (!empty($errors['username'])) {
                         echo implode('<br>', $errors['username']);
+                    }
+                    ?>
+                </span>
+            </div>
+            <div class="form-group">
+                <input type="text" value="<?= $data['full_name'] ?? '' ?>" name="full_name" id="full_name" required placeholder="Họ và tên">
+                <span class="error">
+                    <?php
+                    if (!empty($errors['full_name'])) {
+                        echo implode('<br>', $errors['full_name']);
+                    }
+                    ?>
+                </span>
+            </div>
+            <div class="form-group">
+                <input value="<?= $data['email'] ?? '' ?>" type="text" name="email" id="email" required placeholder="Email">
+                <span class="error">
+                    <?php
+                    if (!empty($errors['email'])) {
+                        echo implode('<br>', $errors['email']);
+                    }
+                    ?>
+                </span>
+            </div>
+            <div class="form-group">
+                <input value="<?= $data['dob'] ?? '' ?>" type="text" name="dob" id="dob" required placeholder="Ngày sinh (YYYY-MM-DD)">
+                <span class="error">
+                    <?php
+                    if (!empty($errors['dob'])) {
+                        echo implode('<br>', $errors['dob']);
                     }
                     ?>
                 </span>
@@ -23,7 +53,17 @@
                 </span>
             </div>
             <div class="form-group">
-                <button type="submit">Đăng nhập</button>
+                <input type="password" value="<?= $data['re_password'] ?? '' ?>" name="re_password" id="re_password" required placeholder="Nhập lại mật khẩu">
+                <span class="error">
+                    <?php
+                    if (!empty($errors['re_password'])) {
+                        echo implode('<br>', $errors['re_password']);
+                    }
+                    ?>
+                </span>
+            </div>
+            <div class="form-group">
+                <button type="submit">Đăng ký</button>
             </div>
 
             <div class="form-group">
@@ -41,7 +81,7 @@
             </div>
 
             <div class="form-group">
-                <p class="register-link">Chưa có tài khoản? <a href="/admin/register">Đăng ký ngay</a></p>
+                <p class="register-link">Đã có tài khoản? <a href="/login">Đăng nhập ngay</a></p>
             </div>
 
         </form>
@@ -50,29 +90,18 @@
 
 <div aria-live="polite" aria-atomic="true" class="bg-body-danger position-relative bd-example-toasts rounded-3">
     <div class="toast-container p-3" id="toastPlacement">
-        <div class="toast" id="loginErrorToast" role="alert">
-            <div class="toast-body" id="loginErrorToastBody">
+        <div class="toast" id="customToast">
+            <div class="toast-body" id="toastBody">
 
             </div>
         </div>
     </div>
 </div>
 
-
-<?php if (!empty($errors['login'])): ?>
+<?php if (!empty($errors['register'])): ?>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const toastEl = document.getElementById('loginErrorToast');
-            const toastBody = document.getElementById('loginErrorToastBody');
-
-            toastPlacement.classList.add('position-fixed', 'top-0', 'start-50', 'translate-middle-x', 'p-3');
-            toastEl.classList.add('bg-danger', 'text-white');
-            toastBody.textContent = <?= json_encode(implode(' ', $errors['login'])) ?>;
-            const toast = new bootstrap.Toast(toastEl, {
-                autohide: true,
-                delay: 3000
-            });
-            toast.show();
+            window.registerError = <?= json_encode($errors['register']) ?>;
         });
     </script>
 <?php endif; ?>

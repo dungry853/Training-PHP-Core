@@ -41,7 +41,7 @@
             </div>
 
             <div class="form-group">
-                <p class="register-link">Chưa có tài khoản? <a href="/admin/register">Đăng ký ngay</a></p>
+                <p class="register-link">Chưa có tài khoản? <a href="/register">Đăng ký ngay</a></p>
             </div>
 
         </form>
@@ -50,8 +50,8 @@
 
 <div aria-live="polite" aria-atomic="true" class="bg-body-danger position-relative bd-example-toasts rounded-3">
     <div class="toast-container p-3" id="toastPlacement">
-        <div class="toast" id="loginErrorToast" role="alert">
-            <div class="toast-body" id="loginErrorToastBody">
+        <div class="toast" id="customToast">
+            <div class="toast-body" id="toastBody">
 
             </div>
         </div>
@@ -61,18 +61,12 @@
 
 <?php if (!empty($errors['login'])): ?>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const toastEl = document.getElementById('loginErrorToast');
-            const toastBody = document.getElementById('loginErrorToastBody');
+        window.loginError = <?= json_encode($errors['login']) ?>;
+    </script>
+<?php endif; ?>
 
-            toastPlacement.classList.add('position-fixed', 'top-0', 'start-50', 'translate-middle-x', 'p-3');
-            toastEl.classList.add('bg-danger', 'text-white');
-            toastBody.textContent = <?= json_encode(implode(' ', $errors['login'])) ?>;
-            const toast = new bootstrap.Toast(toastEl, {
-                autohide: true,
-                delay: 3000
-            });
-            toast.show();
-        });
+<?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
+    <script>
+        window.registerSuccess = <?= json_encode('Đăng ký thành công! Vui lòng đăng nhập.') ?>;
     </script>
 <?php endif; ?>
