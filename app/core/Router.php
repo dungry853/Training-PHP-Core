@@ -3,63 +3,64 @@
 namespace App\Core;
 
 use App\Middlewares\AuthMiddleware;
-use AltoRouter;
+use App\Models\RoleType;
 
 class Router
 {
 
-    protected static $router;
+    protected static array $routes = [];
 
-    public static function init()
+    public static function getRouter(): self
     {
-        self::$router = new AltoRouter();
-
-        // Optional: base path nếu cần (ví dụ /myapp)
-        // self::$router->setBasePath('/myapp');
-        self::$router;
+        return new self();
+    }
+    public static function add(string $method, string $uri, array $target): void
+    {
+        self::$routes[] = [
+            'method' => strtoupper($method),
+            'uri' => rtrim($uri, '/'),
+            'target' => $target,
+        ];
     }
 
-    public static function getRouter()
+
+    public static function dispatch(): void
     {
-        return self::$router;
-    }
+        $currentUri = rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+        $currentMethod = $_SERVER['REQUEST_METHOD'];
 
-    public static function dispatch()
-    {
-
-        $match = self::$router->match();
-        //$match['target'] thường chứa mảng dạng ['TênController', 'method'] (ví dụ: ['UserController', 'login']).
-        if ($match) {
-            $target = $match['target'];
-
-            if (is_array($target)) {
+        foreach (self::$routes as $route) {
+            if (
+                $route['method'] === $currentMethod &&
+                $route['uri'] === $currentUri
+            ) {
+                $target = $route['target'];
                 $controllerName = $target['controller'] ?? null;
                 $method = $target['action'] ?? null;
                 $middleware = $target['middleware'] ?? [];
-            } else {
-                // Nếu target chỉ là mảng index, ví dụ ['UserController', 'login']
-                list($controllerName, $method) = $target;
-                $middleware = [];
-            }
 
-            if (!empty($middleware)) {
-                // Xử lý middleware nếu có
+                // Xử lý middleware
+                if (empty($middleware)) {
+                    $middleware = RoleType::allCases();
+                }
                 $authMiddleware = new AuthMiddleware();
                 $authMiddleware->handle($middleware);
-            }
 
-            $controllerClass = 'App\\Controllers\\' . $controllerName;
+                $controllerClass = 'App\\Controllers\\' . $controllerName;
 
-            if (class_exists($controllerClass) && method_exists($controllerClass, $method)) {
-                $controller = new $controllerClass();
-                call_user_func_array([$controller, $method], $match['params']);
-            } else {
-                // 404 not found
-                echo "Controller or method not found.";
+                if (class_exists($controllerClass) && method_exists($controllerClass, $method)) {
+                    $controller = new $controllerClass();
+                    call_user_func([$controller, $method]);
+                    return;
+                } else {
+                    http_response_code(404);
+                    echo "Controller hoặc method không tồn tại.";
+                    return;
+                }
             }
-        } else {
-            // 404 route not matched
-            echo "Route not matched.";
         }
+
+        http_response_code(404);
+        echo "Không tìm thấy route.";
     }
 }

@@ -25,10 +25,12 @@ class AuthController extends Controller
         $request = new Request();
         $username = $request->getPostParam('username');
         $password = $request->getPostParam('password');
+        $rememberMe = $request->getPostParam('remember_me') ?? '0';
 
         $data = [
             'username' => $username,
-            'password' => $password
+            'password' => $password,
+            'remember_me' => $rememberMe
         ];
 
         $rule = [
@@ -62,17 +64,28 @@ class AuthController extends Controller
 
             return;
         }
+
         $session = new Session();
         $session->set('user', [
-            'user_id' => $user->getUserId(),
             'username' => $user->getUsername(),
             'email' => $user->getEmail(),
             'full_name' => $user->getFullName(),
-            'dob' => $user->getDob(),
-            'role_id' => $user->getRole()->getRoleId(),
+            'dob' => $user->getDob()->format('Y-m-d'),
+            'created_at' => $user->getCreatedAt()->format('Y-m-d H:i:s'),
+            'updated_at' => $user->getUpdatedAt()->format('Y-m-d H:i:s'),
+            'role_id' => $user->getRole()->getRoleId()
         ]);
 
         if ($user->getRole()->getRoleId() == RoleType::USER->value) {
+            if ($rememberMe == '1') {
+
+                $cookieData = json_encode([
+                    'user_id' => $user->getUserId(),
+                    'created_at' => time(),
+                ]);
+                // Set a cookie for "remember me"
+                setcookie('user_session', base64_encode($cookieData), time() + 300, "/"); // 5 minutes
+            }
             return $this->redirect('/');
         }
         return $this->redirect('/admin/dashboard');
@@ -146,6 +159,17 @@ class AuthController extends Controller
         return $this->redirect('/login?success=1');
     }
 
+    public function forgotPassword()
+    {
+        $this->view('auth/forgot-password', ['title' => 'Quên mật khẩu']);
+    }
+
+    public function resetPassword()
+    {
+        $this->view('auth/reset-password', ['title' => 'Đặt lại mật khẩu']);
+    }
+
+
     public function noAccess()
     {
         $this->view('auth/no-access');
@@ -155,6 +179,12 @@ class AuthController extends Controller
     {
         $session = new Session();
         $session->destroy();
+        $cookieData = json_encode([
+            'user_id' => null,
+            'created_at' => null,
+        ]);
+        // Clear the cookie
+        setcookie('user_session', base64_encode($cookieData), time() - 3600, "/"); // Expire the cookie
         return $this->redirect('/login');
     }
 }

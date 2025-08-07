@@ -19,6 +19,8 @@ class User
     private DateTime $dob;
     private DateTime $createdAt;
     private DateTime $updatedAt;
+    private ?string $resetToken = '';
+    private ?DateTime $resetTokenExpiresAt = null;
     private Role $role;
 
     public function __construct(
@@ -113,6 +115,24 @@ class User
         $this->role = $role;
     }
 
+    public function getResetToken(): ?string
+    {
+        return $this->resetToken;
+    }
+    public function setResetToken(?string $resetToken): void
+    {
+        $this->resetToken = $resetToken;
+    }
+
+    public function getResetTokenExpiresAt(): ?DateTime
+    {
+        return $this->resetTokenExpiresAt;
+    }
+    public function setResetTokenExpiresAt(?DateTime $resetTokenExpiresAt): void
+    {
+        $this->resetTokenExpiresAt = $resetTokenExpiresAt;
+    }
+
 
     public static function getUserByUsernameAndPassword(string $username, string $password): ?User
     {
@@ -121,7 +141,6 @@ class User
             $connection = $db->getConnection();
 
             $stmt = $connection->prepare("SELECT * FROM user WHERE username = :username");
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT); // Sử dụng password_hash thay vì md5
             $stmt->bindParam(':username', $username);
             $stmt->execute();
             $userData = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -130,7 +149,7 @@ class User
                 return new User(
                     $userData['user_id'],
                     $userData['username'],
-                    $userData['password'],
+                    '', // Mật khẩu không được trả về
                     $userData['email'],
                     $userData['full_name'],
                     new DateTime($userData['dob']),
@@ -177,5 +196,34 @@ class User
             // Xử lý lỗi nếu cần
             return false;
         }
+    }
+
+    public static function getUserById(int $userId): ?User
+    {
+        try {
+            $db = new Database();
+            $conn = $db->getConnection();
+            $stmt = $conn->prepare("SELECT user_id, username, email, full_name, dob, created_at, updated_at, role_id FROM user WHERE user_id = :user_id");
+            $stmt->bindParam(':user_id', $userId);
+            $stmt->execute();
+            $userData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($userData) {
+                return new User(
+                    $userData['user_id'],
+                    $userData['username'],
+                    '', // Mật khẩu không được trả về
+                    $userData['email'],
+                    $userData['full_name'],
+                    new DateTime($userData['dob']),
+                    new DateTime($userData['created_at']),
+                    new DateTime($userData['updated_at']),
+                    new Role($userData['role_id'], '', new DateTime(), new DateTime())
+                );
+            }
+        } catch (Exception $e) {
+            throw new Exception("Lỗi khi lấy người dùng: " . $e->getMessage());
+        }
+        return null;
     }
 }

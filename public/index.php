@@ -8,7 +8,6 @@ Session::start();
 
 use App\Core\Router;
 
-Router::init();
 
 require_once __DIR__ . '/../routes/web.php';
 

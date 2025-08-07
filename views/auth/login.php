@@ -3,7 +3,7 @@
 use App\Models\RoleType;
 
 $roleId = $_SESSION['user']['role_id'] ?? null;
-if (isset($_SESSION['user']) && in_array($roleId, RoleType::allCases())) {
+if (isset($_SESSION['user']) && in_array($roleId, RoleType::getAdminStaff())) {
     header('Location: /admin/dashboard');
     exit;
 } else if (isset($_SESSION['user']) && $roleId == RoleType::USER->value) {
@@ -36,6 +36,16 @@ if (isset($_SESSION['user']) && in_array($roleId, RoleType::allCases())) {
                     }
                     ?>
                 </span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="remember-me-checkbox">
+                    <input type="checkbox" name="remember_me" id="remember_me" value="1"
+                        <?= !empty($data['remember_me']) ? 'checked' : '' ?>>
+                    <label for="remember_me">Ghi nhớ đăng nhập</label>
+                </div>
+                <a href="/forgot-password">
+                    Quên mật khẩu?
+                </a>
             </div>
             <div class="form-group">
                 <button type="submit">Đăng nhập</button>

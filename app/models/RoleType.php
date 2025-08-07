@@ -16,6 +16,16 @@ enum RoleType: int
             self::ADMIN->value,
             self::ImportStaff->value,
             self::HR->value,
+            self::USER->value,
+        ];
+    }
+
+    public static function getAdminStaff(): array
+    {
+        return [
+            self::ADMIN->value,
+            self::ImportStaff->value,
+            self::HR->value,
         ];
     }
 }

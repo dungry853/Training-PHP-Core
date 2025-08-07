@@ -16,4 +16,6 @@ class HomeController extends Controller
     {
         $this->view('user/index', ['title' => 'Trang người dùng']);
     }
+
+    
 }

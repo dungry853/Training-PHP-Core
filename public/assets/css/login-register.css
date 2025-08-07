@@ -95,6 +95,10 @@ main {
   flex-direction: column;
 }
 
+.form-group.remember-me-checkbox {
+  display: flex;
+}
+
 .form-group .or {
   text-align: center;
   width: 100%;

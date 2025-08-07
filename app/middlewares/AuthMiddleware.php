@@ -6,22 +6,68 @@ use App\Core\Response;
 use App\Core\Session;
 use App\Models\Role;
 use App\Models\RoleType;
+use App\Models\User;
 
 class AuthMiddleware
 {
     public function handle(array $allowRoles)
     {
-        $sessionUser = Session::get('user') ?? null;
+        $sessionUser = Session::get('user');
         $roleId = $sessionUser['role_id'] ?? null;
-        if (!$sessionUser) {
-            // Người dùng chưa đăng nhập, chuyển hướng đến trang đăng nhập
-            Response::redirect('/login');
+        $currentUri = $_SERVER['REQUEST_URI'] ?? '';
+
+
+        if (!$sessionUser && isset($_COOKIE['user_session'])) {
+            $cookieData = json_decode(base64_decode($_COOKIE['user_session']), true); // giải mã cookie 2 lớp
+            $userId = $cookieData['user_id'] ?? null;
+            $createdAt = $cookieData['created_at'] ?? null;
+            $expiredTime = time() - 300; // 5 phút
+
+            if (!isset($userId) || !isset($createdAt) || isset($createdAt) && $createdAt < $expiredTime) {
+                // Cookie đã hết hạn, xóa cookie
+                setcookie('user_session', '', time() - 3600, '/');
+                exit;
+            }
+
+            $user = User::getUserById($userId);
+            if ($user) {
+                Session::set('user', [
+                    'username' => $user->getUsername(),
+                    'email' => $user->getEmail(),
+                    'full_name' => $user->getFullName(),
+                    'dob' => $user->getDob()->format('Y-m-d'),
+                    'created_at' => $user->getCreatedAt()->format('Y-m-d H:i:s'),
+                    'updated_at' => $user->getUpdatedAt()->format('Y-m-d H:i:s'),
+                    'role_id' => $user->getRole()->getRoleId()
+                ]);
+                $sessionUser = Session::get('user');
+                $roleId = $sessionUser['role_id'];
+            }
+        } else {
+
+            if (!$sessionUser) {
+
+                if (!in_array($currentUri, ['/login', '/register', '/forgot-password', '/reset-password'])) {
+                    Response::redirect('/login');
+                    exit;
+                }
+            }
         }
 
-        if ($sessionUser && !in_array($roleId, $allowRoles)) {
-            // Người dùng đã đăng nhập và không có quyền truy cập
+
+
+        if ($sessionUser && !in_array($roleId, $allowRoles) && $currentUri !== '/no-access') {
+
             Response::redirect('/no-access');
+            exit;
         }
+
+
+
+
+
+
+
 
 
 

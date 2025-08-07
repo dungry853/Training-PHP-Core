@@ -11,6 +11,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="/assets/css/login-register.css">
+    <link rel="stylesheet" href="/assets/css/forgot-password.css">
+
 
 </head>
 <?php
@@ -21,8 +23,11 @@ use App\Models\RoleType; ?>
     <header class="header">
         <a href="<?php
 
-
-                    echo isset($_SESSION['user']) ? '/admin/dashboard' : '/'; ?>" class="logo-link">
+                    if (isset($_SESSION['user']) && $_SESSION['user']['role_id'] != RoleType::USER->value) {
+                        echo '/admin/dashboard';
+                    } else {
+                        echo '/';
+                    } ?>" class="logo-link">
             <img class="logo" src="https://t4.ftcdn.net/jpg/04/77/84/59/360_F_477845928_d7f2VuoDerVNAVfZTeKfAmWBOzkJvKIj.jpg" alt="">
         </a>
         <div class="nav-links">
