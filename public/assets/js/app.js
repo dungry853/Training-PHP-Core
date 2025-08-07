@@ -27,18 +27,16 @@ function showToast(message, type = "info", delay = 3000) {
   toast.show();
 }
 
-console.log("app.js loaded");
-
 document.addEventListener("DOMContentLoaded", function () {
   console.log("DOMContentLoaded event fired");
-  if (window.loginError && window.loginError.length > 0) {
-    showToast(window.loginError.join(" "), "error");
-  } else if (window.registerSuccess) {
-    showToast("Đăng ký thành công! Vui lòng đăng nhập.", "success");
+  if (window.toastMessage) {
+    console.log("Toast message found:", window.toastMessage);
+    showToast(window.toastMessage.message, window.toastMessage.type);
+
     const url = new URL(window.location);
-    url.searchParams.delete("success");
+    ["send", "reset", "success"].forEach((param) =>
+      url.searchParams.delete(param)
+    );
     window.history.replaceState({}, document.title, url.pathname);
-  } else if (window.registerError && window.registerError.length > 0) {
-    showToast(window.registerError.join(" "), "error");
   }
 });

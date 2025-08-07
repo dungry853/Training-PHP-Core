@@ -86,12 +86,30 @@ if (isset($_SESSION['user']) && in_array($roleId, RoleType::getAdminStaff())) {
 
 <?php if (!empty($errors['login'])): ?>
     <script>
-        window.loginError = <?= json_encode($errors['login']) ?>;
+        window.toastMessage = {
+            type: "error",
+            message: <?= json_encode(implode(" ", $errors['login'])) ?>
+        };
     </script>
-<?php endif; ?>
-
-<?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
+<?php elseif (isset($_GET['success']) && $_GET['success'] == 1): ?>
     <script>
-        window.registerSuccess = <?= json_encode('Đăng ký thành công! Vui lòng đăng nhập.') ?>;
+        window.toastMessage = {
+            type: "success",
+            message: "Đăng ký thành công! Vui lòng đăng nhập."
+        };
+    </script>
+<?php elseif (isset($_GET['reset']) && $_GET['reset'] == 1): ?>
+    <script>
+        window.toastMessage = {
+            type: "success",
+            message: "Đặt lại mật khẩu thành công! Vui lòng đăng nhập."
+        };
+    </script>
+<?php elseif (isset($_GET['send']) && $_GET['send'] == 1): ?>
+    <script>
+        window.toastMessage = {
+            type: "success",
+            message: "Đã gửi email đặt lại mật khẩu. Vui lòng kiểm tra hộp thư của bạn."
+        };
     </script>
 <?php endif; ?>

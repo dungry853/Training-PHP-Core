@@ -19,8 +19,8 @@ class User
     private DateTime $dob;
     private DateTime $createdAt;
     private DateTime $updatedAt;
-    private ?string $resetToken = '';
-    private ?DateTime $resetTokenExpiresAt = null;
+    private ?string $verificationCode = '';
+    private ?DateTime $codeExpiresAt = null;
     private Role $role;
 
     public function __construct(
@@ -115,23 +115,26 @@ class User
         $this->role = $role;
     }
 
-    public function getResetToken(): ?string
+    public function getVerificationCode(): ?string
     {
-        return $this->resetToken;
-    }
-    public function setResetToken(?string $resetToken): void
-    {
-        $this->resetToken = $resetToken;
+        return $this->verificationCode;
     }
 
-    public function getResetTokenExpiresAt(): ?DateTime
+    public function setVerificationCode(?string $verificationCode): void
     {
-        return $this->resetTokenExpiresAt;
+        $this->verificationCode = $verificationCode;
     }
-    public function setResetTokenExpiresAt(?DateTime $resetTokenExpiresAt): void
+
+    public function getCodeExpiresAt(): ?DateTime
     {
-        $this->resetTokenExpiresAt = $resetTokenExpiresAt;
+        return $this->codeExpiresAt;
     }
+
+    public function setCodeExpiresAt(?DateTime $codeExpiresAt): void
+    {
+        $this->codeExpiresAt = $codeExpiresAt;
+    }
+
 
 
     public static function getUserByUsernameAndPassword(string $username, string $password): ?User
@@ -140,7 +143,7 @@ class User
             $db = new Database();
             $connection = $db->getConnection();
 
-            $stmt = $connection->prepare("SELECT * FROM user WHERE username = :username");
+            $stmt = $connection->prepare("SELECT * FROM user WHERE username = :username or email = :username");
             $stmt->bindParam(':username', $username);
             $stmt->execute();
             $userData = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -225,5 +228,65 @@ class User
             throw new Exception("Lỗi khi lấy người dùng: " . $e->getMessage());
         }
         return null;
+    }
+
+    public static function checkEmailExists(string $email): bool
+    {
+        try {
+            $db = new Database();
+            $conn = $db->getConnection();
+            $stmt = $conn->prepare("SELECT * FROM user WHERE email = :email");
+            $stmt->bindParam(':email', $email);
+            $stmt->execute();
+            return $stmt->rowCount() > 0;
+        } catch (Exception $e) {
+            throw new Exception("Lỗi khi kiểm tra email: " . $e->getMessage());
+        }
+    }
+
+    public static function updateVerificationCode(string $email, string $verificationCode, DateTime $expiresAt): bool
+    {
+        try {
+            $db = new Database();
+            $conn = $db->getConnection();
+            $formattedExpiresAt = $expiresAt->format('Y-m-d H:i:s');
+            $stmt = $conn->prepare("UPDATE user SET verification_code = :verification_code, code_expires_at = :expires_at WHERE email = :email");
+            $stmt->bindParam(':verification_code', $verificationCode);
+            $stmt->bindParam(':expires_at', $formattedExpiresAt);
+            $stmt->bindParam(':email', $email);
+            return $stmt->execute();
+        } catch (Exception $e) {
+            throw new Exception("Lỗi khi cập nhật mã xác nhận: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public static function verifyCode(string $email, string $verificationCode): bool
+    {
+        try {
+            $db = new Database();
+            $conn = $db->getConnection();
+            $stmt = $conn->prepare("UPDATE user SET verification_code = NULL, code_expires_at = NULL WHERE email = :email AND verification_code = :verification_code AND code_expires_at > NOW()");
+            $stmt->bindParam(':email', $email);
+            $stmt->bindParam(':verification_code', $verificationCode);
+            return $stmt->execute() && $stmt->rowCount() > 0;
+        } catch (Exception $e) {
+            throw new Exception("Lỗi khi xác minh mã: " . $e->getMessage());
+        }
+    }
+
+    public static function resetPassword(string $email, string $newPassword): bool
+    {
+        try {
+            $db = new Database();
+            $conn = $db->getConnection();
+            $stmt = $conn->prepare("UPDATE user SET password = :password WHERE email = :email");
+            $stmt->bindParam(':email', $email);
+            $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+            $stmt->bindParam(':password', $hashedPassword);
+            return $stmt->execute() && $stmt->rowCount() > 0;
+        } catch (Exception $e) {
+            throw new Exception("Lỗi khi đặt lại mật khẩu: " . $e->getMessage());
+        }
     }
 }

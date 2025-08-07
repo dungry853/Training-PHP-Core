@@ -15,6 +15,14 @@ class AuthMiddleware
         $sessionUser = Session::get('user');
         $roleId = $sessionUser['role_id'] ?? null;
         $currentUri = $_SERVER['REQUEST_URI'] ?? '';
+        $publicRoutes = [
+            '/login',
+            '/register',
+            '/forgot-password',
+            '/reset-password',
+            '/verify-code',
+            '/no-access',
+        ];
 
 
         if (!$sessionUser && isset($_COOKIE['user_session'])) {
@@ -44,13 +52,17 @@ class AuthMiddleware
                 $roleId = $sessionUser['role_id'];
             }
         } else {
-
-            if (!$sessionUser) {
-
-                if (!in_array($currentUri, ['/login', '/register', '/forgot-password', '/reset-password'])) {
-                    Response::redirect('/login');
-                    exit;
+            $allowAccess = false;
+            foreach ($publicRoutes as $route) {
+                if (str_starts_with($currentUri, $route)) {
+                    $allowAccess = true;
+                    break;
                 }
+            }
+
+            if (!$sessionUser && !$allowAccess) {
+                Response::redirect('/login');
+                exit;
             }
         }
 

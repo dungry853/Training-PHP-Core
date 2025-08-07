@@ -15,8 +15,11 @@ $router::add("GET", "/no-access", ['controller' => 'Auth\AuthController', 'actio
 $router::add("GET", "/register", ['controller' => 'Auth\AuthController', 'action' => 'register', 'middleware' => []], 'register');
 $router::add("POST", "/register", ['controller' => 'Auth\AuthController', 'action' => 'registerPost', 'middleware' => []], 'register.post');
 $router::add("GET", "/forgot-password", ['controller' => 'Auth\AuthController', 'action' => 'forgotPassword', 'middleware' => []], 'forgot_password');
+$router::add("POST", "/forgot-password", ['controller' => 'Auth\AuthController', 'action' => 'forgotPasswordPost', 'middleware' => []], 'forgot_password.post');
 $router::add("GET", "/reset-password", ['controller' => 'Auth\AuthController', 'action' => 'resetPassword', 'middleware' => []], 'reset_password');
-
+$router::add("POST", "/reset-password", ['controller' => 'Auth\AuthController', 'action' => 'resetPasswordPost', 'middleware' => []], 'reset_password.post');
+$router::add("GET", "/verify-code", ['controller' => 'Auth\AuthController', 'action' => 'verifyCode', 'middleware' => []], 'verify_code');
+$router::add("POST", "/verify-code", ['controller' => 'Auth\AuthController', 'action' => 'verifyCodePost', 'middleware' => []], 'verify_code.post');
 //User
 $router::add("GET", "/", ['controller' => 'User\HomeController', 'action' => 'index', 'middleware' => [RoleType::USER->value]], 'user.index');
 

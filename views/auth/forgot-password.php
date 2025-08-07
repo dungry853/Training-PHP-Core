@@ -19,3 +19,32 @@
         </form>
     </div>
 </div>
+
+<div aria-live="polite" aria-atomic="true" class="bg-body-danger position-relative bd-example-toasts rounded-3">
+    <div class="toast-container p-3" id="toastPlacement">
+        <div class="toast" id="customToast">
+            <div class="toast-body" id="toastBody">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<?php if (!empty($errors['reset'])): ?>
+    <script>
+        window.toastMessage = {
+            type: "error",
+            message: "<?= implode('<br>', $errors['reset']) ?>"
+        };
+    </script>
+<?php endif; ?>
+
+<?php if (isset($_GET['send']) && $_GET['send'] == 1): ?>
+    <script>
+        window.toastMessage = {
+            type: "success",
+            message: "Đã gửi email đặt lại mật khẩu! Vui lòng kiểm tra hộp thư của bạn."
+        };
+    </script>
+<?php endif; ?>
